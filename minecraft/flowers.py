@@ -1,5 +1,5 @@
 from mcpi import minecraft
-mc = minecraft.Mineraft.create()
+mc = minecraft.Minecraft.create()
 
 flower = 38
 
