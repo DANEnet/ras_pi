@@ -9,6 +9,7 @@ flower = 38
 gold = 41
 wall_height = 5
 
+mc.camera.setFollow()
 lastx, lasty, lastz = mc.player.getPos()
 while True:
   x, y, z = mc.player.getPos()
@@ -17,5 +18,5 @@ while True:
   lastx =x
   lasty =y
   lastz =z
-  sleep(01.1)
+  sleep(0.3)
   
