@@ -1,3 +1,3 @@
 from mcpi import minecraft
-mc = minecraft.Mineraft.create()
+mc = minecraft.Minecraft.create()
 mc.postToChat('Hello world')
