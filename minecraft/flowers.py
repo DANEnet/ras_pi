@@ -1,4 +1,6 @@
 from mcpi import minecraft
+from time import sleep
+
 mc = minecraft.Minecraft.create()
 
 flower = 38
