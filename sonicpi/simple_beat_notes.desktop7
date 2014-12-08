@@ -1,0 +1,24 @@
+
+use_synth "fm" 
+2.times do 
+  sample :loop_amen
+  play 52
+  sleep 0.5
+  play 55
+  sleep 0.5
+  play 59
+  sleep 0.5
+end
+
+3.times do 
+  sample :loop_amen
+  play 59
+  sleep 0.5
+  play 55
+  sleep 0.5
+  play 52
+  sleep 0.5
+end
+
+play [52, 55, 59]
+ 
