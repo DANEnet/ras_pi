@@ -1,4 +1,4 @@
-tech_education
+raspi_edu
 ==============
 This is a repository of programs to be used with the Goodman Girls INC program. 
 
