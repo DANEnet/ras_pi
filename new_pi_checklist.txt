@@ -1,0 +1,109 @@
+﻿http://raspberrypihobbyist.blogspot.co.uk/2014/12/my-new-system-checklist.html
+Sunday, December 14, 2014
+My New System Checklist
+I recently had need to create a new Raspbian system for a project and decided to record all the things I did after the system image first boots. Frequently, I forget one or two of these, so this will become a checklist that I follow when I create a new system.
+
+There are many guides to creating a system for the Raspberry Pi and this post is not an attempt to create another. I am putting this here for my own reference as much as to share.  To make it helpful to beginners, I have added some explanations.  You may prefer nano over vi as the file editor.
+
+Please feel free to use the comments section to let people know what customization you like to make for your Pi systems.
+
+Load image as usual
+raspi-config runs first time
+- expand file system
+- Internationalization -> set locale -> TZ = US-Eastern
+- Internationalization -> Keyboard = English(US)
+- advanced -> hostname (RasPi-##-Purpose)
+- advanced -> mem split 16 for GPU
+- advanced -> enable SPI and I2C and Serial
+reboot, and log in as pi (raspberry)
+
+CPU overclocking would also be set up in raspi-config, but I haven't had any need to do this.
+
+All of the following commands require root privilege.  You can either put sudo before each command or entersudo -i and run a shell as root.
+
+Create a new user for myself, give it sudoer privilege.
+adduser ted 
+echo "ted ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+
+Update the package database and upgrade all installed packages.
+apt-get update 
+apt-get upgrade
+
+Install some new packages.
+apt-get install samba screen libmysqlclient-dev libi2c-dev
+
+Configure Samba (Windows file sharing)
+vi /etc/samba/smb.conf
+uncomment "socket options = TCP_NODELAY"
+delete all shares and add:
+[opt]
+   comment = opt
+   writable = yes
+   locking = no
+   path = /opt
+   public = yes
+
+Restart the Samba service
+service samba restart  
+
+Edit the SSH server config.  Turning off DNS reverse lookups will speed up the connection process when to log in through SSH.
+vi /etc/ssh/sshd_config
+add "UseDNS no"
+
+Edit the netwrok configuration and set static IP address and wifi config.  The interface name for the wifi will be used below in the supplicant file.
+vi /etc/network/interfaces
+iface eth0 inet static
+   address 192.168.0.51
+   netmask 255.255.255.0
+   gateway 192.168.0.1
+   
+iface home inet static
+   address 192.168.0.53
+   netmask 255.255.255.0
+   gateway 192.168.0.1
+
+Edit the wifi supplicant file.  The "id_str" setting connects back to the name used above.
+vi /etc/wpa_supplicant/wpa_supplicant.conf
+network={
+        id_str="home"
+        ssid="NOTMYSSID"
+        psk="NotMyPassword"
+        proto=WPA
+        key_mgmt=WPA-PSK
+        pairwise=TKIP
+        auth_alg=OPEN
+}
+
+Install Gordon's WiringPi library.  I use this extensively in my C programming.
+cd ~
+git clone git://git.drogon.net/wiringPi
+cd wiringPi
+git pull origin
+./build
+gpio -v
+gpio readall
+
+Edit the kernel module configuration to enable SPI, I2C, and 1-Wire.
+vi /etc/modprobe.d/raspi-blacklist.conf
+uncomment SPI and I2C devices
+
+vi /etc/modules
+add this
+# SPI devices  
+spi-dev  
+# I2C devices  
+i2c-dev  
+i2c_bcm2708
+# 1-Wire devices  
+w1-gpio  
+# 1-Wire thermometer devices  
+w1-therm  
+
+Finally, reboot the system again.  Then log on as the new user you created and  remove the default user.
+userdel pi
+
+If you don't do this last step and your system is accessible from the internet, then it will not be long (sometimes only hours or minutes) before a hacker finds it and does bad things.  My firewall log shows constant attempts to brute force a login via SSH and "pi" is a common user name that is tried.
+
+
+
+

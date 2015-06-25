@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 4.3.4.1 (MacOSX)"/>
+	<meta name="created" content="2015-01-04T16:36:01.468410000"/>
+	<meta name="changed" content="2015-01-04T16:39:54.939891000"/>
+	<style type="text/css">
+		h2.cjk { font-family: "Arial Unicode MS" }
+		h2.ctl { font-family: "Arial Unicode MS" }
+		h3.cjk { font-family: "Arial Unicode MS" }
+		h3.ctl { font-family: "Arial Unicode MS" }
+	</style>
+</head>
+<body lang="en-US" dir="ltr" style="background: transparent">
+<h2 class="western" style="font-variant: normal; letter-spacing: normal; font-style: normal">
+<font color="#000000"><font face="Times New Roman, Times, FreeSerif, serif"><font size="2" style="font-size: 10pt"><b>http://raspberrypihobbyist.blogspot.co.uk/2014/12/my-new-system-checklist.html</b></font></font></font></h2>
+<h2 class="western" style="font-variant: normal; letter-spacing: normal; font-style: normal">
+<font color="#000000"><font face="Times New Roman, Times, FreeSerif, serif"><font size="2" style="font-size: 10pt"><b>Sunday,
+December 14, 2014</b></font></font></font></h2>
+<h3 class="western" style="margin-top: 0in; margin-bottom: 0in; font-variant: normal; letter-spacing: normal; font-style: normal; line-height: 0.17in"><a name="4186840821456213704"></a>
+<span style="display: inline-block; border: none; padding: 0in"><font face="Times New Roman, Times, FreeSerif, serif"><font size="4" style="font-size: 15pt"><b><font color="#bc1142">My
+New System Checklist</span></b></font></font></font></h3>
+<div id="post-body-4186840821456213704" dir="ltr">
+	<p style="margin-bottom: 0in; line-height: 140%">I recently had need
+	to create a new Raspbian system for a project and decided to record
+	all the things I did after the system image first boots. Frequently,
+	I forget one or two of these, so this will become a checklist that I
+	follow when I create a new system.<br><br>There are many guides to
+	creating a system for the Raspberry Pi and this post is not an
+	attempt to create another. I am putting this here for my own
+	reference as much as to share. &nbsp;To make it helpful to
+	beginners, I have added some explanations. &nbsp;You may prefer nano
+	over vi as the file editor.<br><br>Please feel free to use the
+	comments section to let people know what customization you like to
+	make for your Pi systems.<br><br>Load image as usual<br>raspi-config
+	runs first time<br>- expand file system<br>- Internationalization -&gt;
+	set locale -&gt; TZ = US-Eastern<br>- Internationalization -&gt;
+	Keyboard = English(US)<br>- advanced -&gt; hostname
+	(RasPi-##-Purpose)<br>- advanced -&gt; mem split 16 for GPU<br>-
+	advanced -&gt; enable SPI and I2C and Serial<br>reboot, and log in
+	as pi (raspberry)<br><br>CPU overclocking would also be set up in
+	raspi-config, but I haven't had any need to do this.<br><br>All of
+	the following commands require root privilege. &nbsp;You can either
+	put&nbsp;<font face="Courier New, Courier, monospace">sudo</font>&nbsp;before
+	each command or enter<font face="Courier New, Courier, monospace">sudo
+	-i&nbsp;</font>and run a shell as root.<br><br>Create a new user for
+	myself, give it sudoer privilege.<br><font face="Courier New, Courier, monospace">adduser
+	ted&nbsp;</font><br><font face="Courier New, Courier, monospace">echo
+	&quot;ted ALL=(ALL) NOPASSWD: ALL&quot; &gt;&gt;/etc/sudoers</font><br><br><font face="inherit">Update
+	the package database and upgrade all installed packages.</font><br><font face="Courier New, Courier, monospace">apt-get
+	update&nbsp;</font><br><font face="Courier New, Courier, monospace">apt-get
+	upgrade</font><br><font face="Courier New, Courier, monospace"><br></font><font face="inherit">Install
+	some new packages.</font><br><font face="Courier New, Courier, monospace">apt-get
+	install samba screen libmysqlclient-dev libi2c-dev</font><br><br>Configure
+	Samba (Windows file sharing)<br><font face="Courier New, Courier, monospace">vi
+	/etc/samba/smb.conf</font><br>uncomment &quot;socket options =
+	TCP_NODELAY&quot;<br>delete all shares and add:<br><font face="Courier New, Courier, monospace">[opt]</font><br>&nbsp;
+	&nbsp;<font face="Courier New, Courier, monospace">comment = opt</font><br>&nbsp;
+	&nbsp;<font face="Courier New, Courier, monospace">writable = yes</font><br>&nbsp;
+	&nbsp;<font face="Courier New, Courier, monospace">locking = no</font><br>&nbsp;
+	&nbsp;<font face="Courier New, Courier, monospace">path = /opt</font><br>&nbsp;
+	&nbsp;<font face="Courier New, Courier, monospace">public =
+	yes</font><br><font face="Courier New, Courier, monospace"><br></font>Restart
+	the Samba service<br><font face="Courier New, Courier, monospace">service
+	samba restart &nbsp;</font><br><br>Edit the SSH server config.
+	&nbsp;Turning off DNS reverse lookups will speed up the connection
+	process when to log in through SSH.<br><font face="Courier New, Courier, monospace">vi
+	/etc/ssh/sshd_config</font><br>add &quot;UseDNS no&quot;<br><br>Edit
+	the netwrok configuration and set static IP address and wifi config.
+	&nbsp;The interface name for the wifi will be used below in the
+	supplicant file.<br><font face="Courier New, Courier, monospace">vi
+	/etc/network/interfaces</font><br><font face="Courier New, Courier, monospace">iface
+	eth0 inet static</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">address
+	192.168.0.51</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">netmask
+	255.255.255.0</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">gateway
+	192.168.0.1</font><br>&nbsp; &nbsp;<br><font face="Courier New, Courier, monospace">iface
+	home inet static</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">address
+	192.168.0.53</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">netmask
+	255.255.255.0</font><br>&nbsp; &nbsp;<font face="Courier New, Courier, monospace">gateway
+	192.168.0.1</font><br><br>Edit the wifi supplicant file. &nbsp;The
+	&quot;id_str&quot; setting connects back to the name used above.<br><font face="Courier New, Courier, monospace">vi
+	/etc/wpa_supplicant/wpa_supplicant.conf</font><br><font face="Courier New, Courier, monospace">network={</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">id_str=&quot;home&quot;</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">ssid=&quot;NOTMYSSID&quot;</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">psk=&quot;NotMyPassword&quot;</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">proto=WPA</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">key_mgmt=WPA-PSK</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">pairwise=TKIP</font><br>&nbsp;
+	&nbsp; &nbsp; &nbsp; <font face="Courier New, Courier, monospace">auth_alg=OPEN</font><br><font face="Courier New, Courier, monospace">}</font><br><br><font face="inherit">Install
+	Gordon's WiringPi library. &nbsp;I use this extensively in my C
+	programming.</font><br><font face="Courier New, Courier, monospace">cd
+	~</font><br><font face="Courier New, Courier, monospace">git clone
+	git://git.drogon.net/wiringPi</font><br><font face="Courier New, Courier, monospace">cd
+	wiringPi</font><br><font face="Courier New, Courier, monospace">git
+	pull origin</font><br><font face="Courier New, Courier, monospace">./build</font><br><font face="Courier New, Courier, monospace">gpio
+	-v</font><br><font face="Courier New, Courier, monospace">gpio
+	readall</font><br><font face="Courier New, Courier, monospace"><br></font><font face="inherit">Edit
+	the kernel module configuration to enable SPI, I2C, and 1-Wire.</font><br><font face="Courier New, Courier, monospace">vi
+	/etc/modprobe.d/raspi-blacklist.conf</font><br>uncomment SPI and I2C
+	devices<br><br><font face="Courier New, Courier, monospace">vi
+	/etc/modules</font><br><font face="inherit">add this</font><br><font face="Courier New, Courier, monospace">#
+	SPI devices &nbsp;</font><br><font face="Courier New, Courier, monospace">spi-dev
+	&nbsp;</font><br><font face="Courier New, Courier, monospace"># I2C
+	devices &nbsp;</font><br><font face="Courier New, Courier, monospace">i2c-dev
+	&nbsp;</font><br><font face="Courier New, Courier, monospace">i2c_bcm2708</font><br><font face="Courier New, Courier, monospace">#
+	1-Wire devices &nbsp;</font><br><font face="Courier New, Courier, monospace">w1-gpio
+	&nbsp;</font><br><font face="Courier New, Courier, monospace">#
+	1-Wire thermometer devices &nbsp;</font><br><font face="Courier New, Courier, monospace">w1-therm
+	&nbsp;</font><br><br>Finally, reboot the system again. &nbsp;Then
+	log on as the new user you created and &nbsp;remove the default
+	user.<br><font face="Courier New, Courier, monospace">userdel pi</font></p>
+	<p style="margin-bottom: 0in; line-height: 140%"><br/>
+
+	</p>
+	<p style="margin-bottom: 0in; font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; line-height: 140%">
+	<span style="display: inline-block; border: none; padding: 0in"><font face="inherit"><font size="2" style="font-size: 8pt"><font color="#000000">If
+	you don't do this last step and your system is accessible from the
+	internet, then it will not be long (sometimes only hours or minutes)
+	before a hacker finds it and does&nbsp;<i>bad things</i>. &nbsp;My
+	firewall log shows constant attempts to brute force a login via SSH
+	and &quot;pi&quot; is a common user name that is tried.</span></font></font></font></p>
+	<p style="margin-bottom: 0in; font-variant: normal; letter-spacing: normal; font-style: normal; font-weight: normal; line-height: 140%">
+	<span style="display: inline-block; border: none; padding: 0in"><font face="Times New Roman, Times, FreeSerif, serif"><font size="2" style="font-size: 8pt"><font color="#000000"><br><br></span></font></font></font><br/>
+
+	</p>
+</div>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>
